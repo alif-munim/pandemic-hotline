@@ -33,6 +33,51 @@ LUIS provided us with an intuitive user interface where we could enter example s
 ## Azure Speech To Text Service
 We originally did not plan to use any Azure services beyond LUIS. However, we quickly discovered that the inbuilt transcription features of our communication API, Twilio, were not up to the task. Addresses were often indecipherable, names were misspelt, and the transcription overall was incoherent. This became a blocking issue, as LUIS depends on proper transcription of phone call audio.
 
+```python
+import azure.cognitiveservices.speech as speechsdk
+import time
+
+# Creates an instance of a speech config with specified subscription key and service region.
+# Replace with your own subscription key and region identifier from here: https://aka.ms/speech/sdkregion
+speech_key, service_region = "key", "region"
+speech_config = speechsdk.SpeechConfig(subscription=speech_key, region=service_region)
+
+# Creates an audio configuration that points to an audio file.
+# Replace with your own audio filename.
+audio_filename = "audio.wav"
+audio_input = speechsdk.audio.AudioConfig(filename=audio_filename)
+
+# Creates a recognizer with the given settings
+speech_recognizer = speechsdk.SpeechRecognizer(speech_config=speech_config, audio_config=audio_input)
+
+done = False
+def stop_cb(evt):
+    """callback that stops continuous recognition upon receiving an event `evt`"""
+    # print('CLOSING on {}'.format(evt))
+    speech_recognizer.stop_continuous_recognition()
+    global done
+    done = True
+
+all_results = []
+def handle_final_result(evt):
+    all_results.append(evt.result.text.lower()[:-1])
+
+speech_recognizer.recognized.connect(handle_final_result)
+# Connect callbacks to the events fired by the speech recognizer
+
+# stop continuous recognition on either session stopped or canceled events
+speech_recognizer.session_stopped.connect(stop_cb)
+speech_recognizer.canceled.connect(stop_cb)
+
+# Start continuous speech recognition
+speech_recognizer.start_continuous_recognition()
+while not done:
+    time.sleep(.5)
+
+# print("Printing all results:")
+print(" ".join(all_results))
+```
+
 We were delighted to discover that Azure offers its own Speech to Text service, which both has easy integration into LUIS, and offers much more accurate transcriptions.
 
 Although our project is based in node.js and there is as of yet limited implementation for speech to text in javascript, we were easily able to navigate a variety of quickstart tutorials of other programming languages in the azure documentation. We ended up implementing our speech to text in python, and it led to such accurate transcriptions that we stopped worrying about it since.
@@ -48,7 +93,36 @@ Thanks to the growing community of developers who work with azure cloud, we were
 <kbd><img align="left" width="500" src="https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/001/195/599/datas/gallery.jpg" alt="registration-01" border="0"></kbd><br/><br/>
 
 # How Does Super Eats Work?
-To begin, we used Twilio to acquire a phone number with which we set up an Express server so that every time a call was received, a request was made onto our server. When the request was received, a message played, after which we began recording the user's voice through Twilio. Once these calls have ended, that data is sent to and transcribed by Microsoft Azure’s speech-to-text platform. We must then break this data up into its relevant parts, this is where Azure LUIS comes in. Our LUIS model sends us the information the grocery store needs to set up a translation. The last step in our implementation is sending this information to our database in MongoDB, used as a part of our front-end. This database is what is displayed on the web app that the stores can access a user-friendly synopsis of each order.
+To begin, we used Twilio to acquire a phone number with which we set up an Express server so that every time a call was received, a request was made onto our server. When the request was received, a message played, after which we began recording the user's voice through Twilio. 
+
+```javascript
+app.post('/voice', (req, res) => {
+    const twiml = new VoiceResponse();
+    twiml.say('Hello welcome to Super Eats! Please state your name, address and order.');
+    twiml.record({ transcribe: true, transcribeCallback: '/transcribe' });
+    twiml.hangup();
+    res.type('text/xml');
+    res.send(twiml.toString());
+});
+
+app.post('/transcribe', async (req, res) => {
+    var recordingUrl = req.body.RecordingUrl;
+    recordingUrl = recordingUrl.concat(".wav");
+    var transcription = "";
+    transcription = await getTranscription(recordingUrl);
+    var transcriptionText = transcription;
+    console.log(transcriptionText);
+    transcription = encodeURIComponent(transcription);
+    var from = req.body.From;
+    var luisquery = "https://pandemicphoneline.cognitiveservices.azure.com/luis/prediction/v3.0/apps/ea9b338e-0f16-4271-b071-9da6c95dd716/slots/production/predict?subscription-key=c584e56247e349d9ad6572a9445d0309&verbose=true&show-all-intents=true&log=true&query=";
+    luisquery = luisquery.concat(transcription);
+    console.log(luisquery);
+
+    axios.get(luisquery).then((res) => ...);
+ }
+```
+
+Once these calls have ended, that data is sent to and transcribed by Microsoft Azure’s speech-to-text platform. We must then break this data up into its relevant parts, this is where Azure LUIS comes in. Our LUIS model sends us the information the grocery store needs to set up a translation. The last step in our implementation is sending this information to our database in MongoDB, used as a part of our front-end. This database is what is displayed on the web app that the stores can access a user-friendly synopsis of each order.
 
 # Challenges We Ran Into
 One of the biggest challenges we faced was speech transcription, we first began with the Twilio platform. Twillio would directly transcribe the audio file to text, which turned out to be very inaccurate. In order to rectify this, we decided to implement Azure’s speech to text. Twilio would still record and download the audio file, but not Microsoft’s speech to text platform would transcribe the audio files. Another challenge was figuring out how to deploy, this too was solved using Azure.
