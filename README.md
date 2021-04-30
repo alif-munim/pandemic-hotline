@@ -3,7 +3,7 @@ An fully automated natural language processing phone line to break down technica
 Created during Hack The 6ix 2020.
 
 # Motivation
-Everyone has been impacted by Covid-19, some were hit much harder than others. Yet, in this time of instability and uncertainty, one fact of life remains constant. People need to eat, to buy products necessary for daily life. However, even though stores have opened up with new safety measures such as special hours for elderly populations and social distancing guidelines, there are still people who do not have access to stores. For a plethora of reasons, such as a comprised immune system or old age, a subset of the population cannot visit grocery stores in-person. To combat this, many people choose to buy their groceries online, but not everyone can use websites and apps adequately. Members of our team have close relatives who are now highly dependant on others to perform this basic task, hence our primary goal is to make grocery shopping accessible for all people.
+> _Everyone has been impacted by Covid-19, some were hit much harder than others. Yet, in this time of instability and uncertainty, one fact of life remains constant. People need to eat, to buy products necessary for daily life. However, even though stores have opened up with new safety measures such as special hours for elderly populations and social distancing guidelines, there are still people who do not have access to stores. For a plethora of reasons, such as a comprised immune system or old age, a subset of the population cannot visit grocery stores in-person. To combat this, many people choose to buy their groceries online, but not everyone can use websites and apps adequately. Members of our team have close relatives who are now highly dependant on others to perform this basic task, hence our primary goal is to make grocery shopping accessible for all people._
 
 # Description
 Our solution is an automated natural language processing grocery store hotline to break down technical barriers during the pandemic. Users can place orders for groceries with ease, and essential workers can receive and fulfill them without coming into contact with anyone. Thus protecting everyone involved and ensuring easy access to essential items..
@@ -17,8 +17,11 @@ Our solution is an automated natural language processing grocery store hotline t
 * An archive of orders
 * A dashboard that includes useful visualizations of data for the grocery store
 
-# Overview
-![alt](https://i.ibb.co/L9CVQhf/overview.png)
+<kbd><img align="left" width="500" src="https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/001/195/600/datas/original.png" alt="registration-01" border="0"></kbd><br/><br/>
+<kbd><img align="left" width="500" src="https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/001/195/598/datas/gallery.jpg" alt="registration-01" border="0"></kbd><br/><br/>
+
+# Technical Overview
+<kbd>![alt](https://i.ibb.co/L9CVQhf/overview.png)<kbd>
 
 # Technologies
 
@@ -41,7 +44,8 @@ An essential part of our application is of course for it to be not only served l
 A database is the center of all the data in a full-stack application. For our implementation, we needed to provide a way to persist our data without it being lost whenever we are closing or refreshing our server. It was of utmost importance to keep track of our items and orders in one of the most reliable databases on the market and hosted on quality, low downtime servers provided by the Azure team.
 
 ## Azure Maps 
-Thanks to the growing community of developers who work with azure cloud, we were able to find a seamless node.js integration to work with azure maps through an npm library. These maps added both depth and utility to the user interface and opened up a variety of creative ways to display order information. We used the maps service to create a heatmap of orders on our site dashboard, and a map with a pin marker on each individual order page. We hope to extend functionality further by finding the most efficient routes from the store to a given destination and use this information to calculate delivery price estimates.
+Thanks to the growing community of developers who work with azure cloud, we were able to find a seamless node.js integration to work with azure maps through an npm library. These maps added both depth and utility to the user interface and opened up a variety of creative ways to display order information. We used the maps service to create a heatmap of orders on our site dashboard, and a map with a pin marker on each individual order page. We hope to extend functionality further by finding the most efficient routes from the store to a given destination and use this information to calculate delivery price estimates.<br/><br/>
+<kbd><img align="left" width="500" src="https://challengepost-s3-challengepost.netdna-ssl.com/photos/production/software_photos/001/195/599/datas/gallery.jpg" alt="registration-01" border="0"></kbd><br/><br/>
 
 # How Does Super Eats Work?
 To begin, we used Twilio to acquire a phone number with which we set up an Express server so that every time a call was received, a request was made onto our server. When the request was received, a message played, after which we began recording the user's voice through Twilio. Once these calls have ended, that data is sent to and transcribed by Microsoft Azure’s speech-to-text platform. We must then break this data up into its relevant parts, this is where Azure LUIS comes in. Our LUIS model sends us the information the grocery store needs to set up a translation. The last step in our implementation is sending this information to our database in MongoDB, used as a part of our front-end. This database is what is displayed on the web app that the stores can access a user-friendly synopsis of each order.
